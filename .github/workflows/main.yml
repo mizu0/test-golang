@@ -54,6 +54,6 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: test_service
           cluster: test
-          codedeploy-appspec: aws/appspec.json
+          codedeploy-appspec: aws/appspec.yaml
           codedeploy-application: ecs
           codedeploy-deployment-group: ecs_bluegreen
