@@ -25,12 +25,13 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 	}))
 	svc := codedeploy.New(sess)
 
-	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello")
-	defer resp.Body.Close()
+	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hoge")
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
+	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode == 200 && string(body) == "Hello World!" {
