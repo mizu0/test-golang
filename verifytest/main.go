@@ -30,7 +30,7 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 	time.Sleep(time.Second * 30)
 
 	// test listener の port
-	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello")
+	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello-world")
 	if err != nil {
 		fmt.Println(err)
 		return err
