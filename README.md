@@ -1,1 +1,1 @@
-# test-golang
+# test-service
