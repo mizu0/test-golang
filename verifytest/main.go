@@ -25,7 +25,7 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 	}))
 	svc := codedeploy.New(sess)
 
-	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com/hello")
+	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello")
 	defer resp.Body.Close()
 	if err != nil {
 		return err
