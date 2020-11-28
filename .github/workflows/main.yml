@@ -26,10 +26,33 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Docker build and push
-        id: build-and-push
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -f ./Dockerfile -t $ECR_REGISTRY/test-server:$IMAGE_TAG .
           docker push $ECR_REGISTRY/test-server:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition test_taskd --query taskDefinition > aws/task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: aws/task-definition.json
+          container-name: my-container
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: test_service
+          cluster: test
+          codedeploy-appspec: aws/appspec.json
+          codedeploy-application: ecs
+          codedeploy-deployment-group: ecs_bluegreen
