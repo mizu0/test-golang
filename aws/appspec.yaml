@@ -9,3 +9,6 @@ Resources:
           ContainerName: "server"
           ContainerPort: 8000
         PlatformVersion: "LATEST"
+
+Hooks:
+  - AfterAllowTestTraffic: "ecs-bluegreen-verifytest"
