@@ -29,6 +29,7 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 	// blue/green でのtarget groupの切り替わり見たいので、sleep入れてみる
 	time.Sleep(time.Second * 30)
 
+	// test listener の port
 	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello")
 	if err != nil {
 		fmt.Println(err)
