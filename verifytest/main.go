@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -25,7 +26,10 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 	}))
 	svc := codedeploy.New(sess)
 
-	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hoge")
+	// blue/green でのtarget groupの切り替わり見たいので、sleep入れてみる
+	time.Sleep(time.Second * 30)
+
+	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello")
 	if err != nil {
 		fmt.Println(err)
 		return err
