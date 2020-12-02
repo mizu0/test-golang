@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/codedeploy"
+	"github.com/aws/aws-sdk-go/service/elbv2"
 )
 
 
@@ -24,13 +25,26 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 			Region: aws.String("ap-northeast-1"),
 		},
 	}))
-	svc := codedeploy.New(sess)
+	lb := elbv2.New(sess)
+	cd := codedeploy.New(sess)
+
+	in := &elbv2.DescribeLoadBalancersInput{
+		Names: []*string{
+			aws.String("ecs-bluegreen-test-lb"),
+		},
+	}
+	out, err := lb.DescribeLoadBalancers(in)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 
 	// blue/green でのtarget groupの切り替わり見たいので、sleep入れてみる
 	time.Sleep(time.Second * 30)
 
 	// test listener の port
-	resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello-world")
+	resp, err := http.Get(fmt.Sprintf("http://%s:8080/hello-world", *out.LoadBalancers[0].DNSName))
+	//resp, err := http.Get("http://ecs-bluegreen-test-lb-1428833294.ap-northeast-1.elb.amazonaws.com:8080/hello-world")
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -46,12 +60,11 @@ func handler(event codedeploy.PutLifecycleEventHookExecutionStatusInput) error {
 		fmt.Println("Failed")
 	}
 
-	input := &codedeploy.PutLifecycleEventHookExecutionStatusInput{
+	output, err := cd.PutLifecycleEventHookExecutionStatus(&codedeploy.PutLifecycleEventHookExecutionStatusInput{
 		DeploymentId: deploymentID,
 		LifecycleEventHookExecutionId:lifecycleEventHookExecutionID,
 		Status: aws.String(validationTestResult),
-	}
-	output, err := svc.PutLifecycleEventHookExecutionStatus(input)
+	})
 	fmt.Println(output)
 
 	return nil
